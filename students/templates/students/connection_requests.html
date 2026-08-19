@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Requests</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow">
+    <header class="site-header"><h1>Connection Requests</h1><a class="button" href="{% url 'students:dashboard' %}">Dashboard</a></header>
+    {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% if connection_requests %}<div class="recommendation-list">{% for request in connection_requests %}<article class="recommendation-card"><div class="card-content"><h3>{{ request.name }}</h3>{% if request.bio %}<p>{{ request.bio }}</p>{% endif %}<p class="muted">{{ request.student_id }}</p></div><div class="actions card-action"><form method="post" action="{% url 'students:accept_request' request.student_id %}">{% csrf_token %}<button type="submit" class="button-green">Accept</button></form><form method="post" action="{% url 'students:reject_request' request.student_id %}">{% csrf_token %}<button type="submit" class="button-danger">Reject</button></form></div></article>{% endfor %}</div>{% else %}<div class="empty-state">No connection requests.</div>{% endif %}
+</main>
+</body>
+</html>

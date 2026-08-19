@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell">
+    <header class="site-header">
+        <div><h1>Welcome, {{ student.name }}</h1><p class="muted">Connect with people who share your skills and college.</p></div>
+        <nav class="nav-links"><a class="button" href="{% url 'students:profile' %}">Profile</a><a class="button" href="{% url 'students:request' %}">Requests</a><a class="button" href="{% url 'students:logout' %}">Logout</a></nav>
+    </header>
+    {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    <section class="panel">
+        <h2>Find Students</h2>
+        <form method="get" class="actions"><input type="search" name="q" value="{{ query }}" placeholder="Search by name, skill, or college"><button type="submit">Search</button></form>
+    </section>
+    {% if query %}
+    <section class="panel"><h2>Search results for “{{ query }}”</h2>
+        {% if search_results %}<div class="recommendation-list">{% for result in search_results %}{% include 'students/_student_card.html' with person=result.student matching_skills=result.skills college=result.college %}{% endfor %}</div>{% else %}<div class="empty-state">No students found.</div>{% endif %}
+    </section>
+    {% endif %}
+    <div class="dashboard-grid">
+        <section class="panel"><h2>Your Skills</h2>{% if skills %}<div class="tag-list">{% for skill in skills %}<span class="tag">{{ skill.name }}</span>{% endfor %}</div>{% else %}<p class="muted">No skills added yet.</p>{% endif %}</section>
+        <section class="panel"><h2>Your College</h2>{% if college %}<p>{{ college.name }}</p>{% if college.location %}<p class="muted">{{ college.location }}</p>{% endif %}{% else %}<p class="muted">No college added yet.</p>{% endif %}</section>
+        <section class="panel section-wide"><div class="site-header"><div><h2>Skill-Based Recommendation</h2><p class="muted">Students who share one or more of your skills.</p></div><a class="button" href="{% url 'students:skill_recommendation' %}">View All</a></div>
+            {% if skill_recommendations %}<div class="recommendation-list">{% for recommendation in skill_recommendations|slice:':3' %}{% include 'students/_student_card.html' with person=recommendation.student matching_skills=recommendation.matching_skills %}{% endfor %}</div>{% else %}<div class="empty-state">No skill-based recommendations yet.</div>{% endif %}
+        </section>
+        <section class="panel section-wide"><div class="site-header"><div><h2>College-Based Recommendation</h2><p class="muted">Students from your college, shown in one focused list.</p></div><a class="button" href="{% url 'students:college_recommendation' %}">View All</a></div>
+            {% if college_recommendations %}<div class="recommendation-list">{% for recommendation in college_recommendations|slice:':3' %}{% include 'students/_student_card.html' with person=recommendation.student college=recommendation.college %}{% endfor %}</div>{% else %}<div class="empty-state">No students from your college yet.</div>{% endif %}
+        </section>
+        <section class="panel section-wide"><h2>Your Projects</h2>{% if projects %}{% for project in projects %}<article class="project-item"><h3>{{ project.name }}</h3><p>{{ project.description }}</p></article>{% endfor %}{% else %}<div class="empty-state">You have not created any projects yet.</div>{% endif %}<div class="actions"><a class="button button-green" href="{% url 'students:create_project' %}">Add Project</a></div></section>
+    </div>
+</main>
+</body>
+</html>

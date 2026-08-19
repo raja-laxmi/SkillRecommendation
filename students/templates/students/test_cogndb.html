@@ -1,0 +1,13 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CognoDB Test</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow"><section class="panel"><h1>CognoDB Test</h1><p class="message success">Database connection is working.</p>{% if students %}<h2>Students</h2><ul class="list-clean">{% for student in students %}<li><strong>{{ student.name }}</strong><span class="muted">{{ student.email }}</span></li>{% endfor %}</ul>{% else %}<div class="empty-state">No test students found.</div>{% endif %}</section></main>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell">
+    <header class="site-header"><div><h1>My Profile</h1><p class="muted">Your student identity and project space.</p></div><nav class="nav-links"><a class="button" href="{% url 'students:dashboard' %}">Dashboard</a><a class="button" href="{% url 'students:edit_profile' %}">Edit Profile</a><a class="button" href="{% url 'students:logout' %}">Logout</a></nav></header>
+    <div class="profile-grid">
+        <section class="panel"><h2>{{ student.name }}</h2><p><strong>Email:</strong> {{ student.email }}</p><p><strong>Bio:</strong> {{ student.bio|default:'Add a short bio to introduce yourself.' }}</p></section>
+        <section class="panel"><h2>College</h2>{% if college %}<p>{{ college.name }}</p><p class="muted">{{ college.location }}</p>{% else %}<p class="muted">No college added.</p>{% endif %}</section>
+        <section class="panel"><h2>Skills</h2>{% if skills %}<div class="tag-list">{% for skill in skills %}<span class="tag">{{ skill.name }}</span>{% endfor %}</div>{% else %}<p class="muted">No skills added.</p>{% endif %}</section>
+        <section class="panel"><h2>Projects</h2>{% if projects %}{% for project in projects %}<article class="project-item"><h3>{{ project.name }}</h3><p>{{ project.description }}</p></article>{% endfor %}{% else %}<p class="muted">No projects yet.</p>{% endif %}<div class="actions"><a class="button button-green" href="{% url 'students:create_project' %}">Add Project</a></div></section>
+    </div>
+</main>
+</body>
+</html>

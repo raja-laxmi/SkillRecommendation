@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Project</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow form-page">
+    <section class="form-box">
+        <h1>Create Project</h1>
+        <p class="muted">Student: {{ student.name }}</p>
+        {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <label>Project Name <input type="text" name="project_name" required></label>
+            <label>Description <textarea name="description" rows="6" required></textarea></label>
+            <button type="submit" class="button-green">Create Project</button>
+        </form>
+        <p><a href="{% url 'students:profile' %}">Back to Profile</a></p>
+    </section>
+</main>
+</body>
+</html>

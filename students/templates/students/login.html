@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow form-page">
+    <section class="form-box">
+        <h1>Student Login</h1>
+        <p class="muted">Return to your student network.</p>
+        {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <label>Email <input type="email" name="email" required></label>
+            <label>Password <input type="password" name="password" required></label>
+            <button type="submit" class="button-green">Login</button>
+        </form>
+        <p class="muted">Need an account? <a href="{% url 'students:signup' %}">Create Account</a></p>
+    </section>
+</main>
+</body>
+</html>

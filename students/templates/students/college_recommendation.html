@@ -1,0 +1,18 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College-Based Recommendation</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell">
+    <header class="site-header"><div><h1>College-Based Recommendation</h1><p class="muted">Meet students from your college community.</p></div><a class="button" href="{% url 'students:dashboard' %}">Dashboard</a></header>
+    <section class="panel"><h2>Hello {{ student.name }}</h2>
+        {% if same_college_students %}<div class="recommendation-list">{% for recommendation in same_college_students %}{% include 'students/_student_card.html' with person=recommendation.student college=recommendation.college %}{% endfor %}</div>{% else %}<div class="empty-state">No college recommendations available.</div>{% endif %}
+    </section>
+</main>
+</body>
+</html>

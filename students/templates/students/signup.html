@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Student Account</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow form-page">
+    <section class="form-box">
+        <h1>Create Student Account</h1>
+        <p class="muted">Build your profile and find students who match your goals.</p>
+        {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+        <form method="post" action="{% url 'students:signup' %}" class="form-grid">
+            {% csrf_token %}
+            <label>Name <input type="text" name="name" required></label>
+            <label>Email <input type="email" name="email" required></label>
+            <label>Password <input type="password" name="password" minlength="8" required></label>
+            <label>Bio <textarea name="bio"></textarea></label>
+            <label>College <input type="text" name="college_name" required></label>
+            <label>Location <input type="text" name="location" required></label>
+            <label>Skills <input type="text" name="skills" placeholder="Python, Django, React"></label>
+            <button type="submit" class="button-green">Create Account</button>
+        </form>
+        <p class="muted">Already have an account? <a href="{% url 'students:login' %}">Login</a></p>
+    </section>
+</main>
+</body>
+</html>

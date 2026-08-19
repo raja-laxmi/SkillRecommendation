@@ -1,0 +1,18 @@
+<article class="recommendation-card">
+    <div class="card-content">
+        <h3>{{ person.name }}</h3>
+        {% if person.bio %}<p>{{ person.bio }}</p>{% endif %}
+        {% if matching_skills %}
+            <div class="tag-list">
+                {% for skill in matching_skills %}<span class="tag">{{ skill }}</span>{% endfor %}
+            </div>
+        {% endif %}
+        {% if college %}<p><strong>College:</strong> {{ college.name }}{% if college.location %}, {{ college.location }}{% endif %}</p>{% endif %}
+    </div>
+    <div class="card-action">
+        <form method="post" action="{% url 'students:send_request' person.student_id %}">
+            {% csrf_token %}
+            <button type="submit" class="button-green">Send Request</button>
+        </form>
+    </div>
+</article>

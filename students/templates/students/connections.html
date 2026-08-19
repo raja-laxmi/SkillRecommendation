@@ -1,0 +1,16 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Connections</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow">
+    <header class="site-header"><h1>My Connections</h1><a class="button" href="{% url 'students:dashboard' %}">Dashboard</a></header>
+    {% if connections %}<div class="recommendation-list">{% for connection in connections %}<article class="panel"><h3>{{ connection.name }}</h3>{% if connection.student_id %}<p class="muted">{{ connection.student_id }}</p>{% endif %}</article>{% endfor %}</div>{% else %}<div class="empty-state">You do not have any connections yet.</div>{% endif %}
+</main>
+</body>
+</html>

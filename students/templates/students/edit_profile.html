@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow form-page">
+    <section class="form-box">
+        <h1>Edit Profile</h1>
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            <label>Name <input type="text" name="name" value="{{ student.name }}" required></label>
+            <label>Email <input type="email" name="email" value="{{ student.email }}" required></label>
+            <label>Bio <textarea name="bio">{{ student.bio }}</textarea></label>
+            <label>College <input type="text" name="college" value="{{ college.name }}" required></label>
+            <label>Location <input type="text" name="location" value="{{ college.location }}"></label>
+            <label>Skills <input type="text" name="skills" placeholder="Python, Django, React"></label>
+            <div class="actions"><button type="submit" class="button-green">Save Changes</button><a class="button" href="{% url 'students:profile' %}">Cancel</a></div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

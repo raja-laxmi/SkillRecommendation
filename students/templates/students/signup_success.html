@@ -1,0 +1,13 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Successful</title>
+    <link rel="stylesheet" href="{% static 'students/css/site.css' %}">
+</head>
+<body>
+<main class="page-shell narrow form-page"><section class="form-box"><h1>Account Created Successfully</h1><p>Welcome, {{ student.name }}. Your student account is ready.</p><a class="button button-green" href="{% url 'students:login' %}">Login to Your Account</a></section></main>
+</body>
+</html>
