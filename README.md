@@ -117,4 +117,4 @@ project/
             └── seed_data.py
 
 
-note: actaully my personal opion is that, it is great for build AI tools or something to manage the data in a graph formatt bu neo4j needed open when we are working in the projec if not it will stopped by it self it makes the progress to slow
+note: actaully my personal opion is that, it is great for building AI tools or something to manage the data in a graph format but neo4j needed to open when we are working in the projec if not it will stopped by it self it makes the progress to slow
