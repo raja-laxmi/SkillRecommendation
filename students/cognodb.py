@@ -491,42 +491,36 @@ def get_skill_recommendations(student_id, limit=10):
     """
 
     with driver.session() as session:
+        
         result = session.run(
-            """
-            MATCH (me:Student {student_id: $student_id})
-                  -[:HAS_SKILL]->(my_skill:Skill)
+        """
+        MATCH (me:Student {student_id: $student_id})
+            -[:HAS_SKILL]->(my_skill:Skill)
 
-            MATCH (other:Student)
-                  -[:HAS_SKILL]->(my_skill)
+        WITH me, collect(DISTINCT my_skill) AS my_skills
 
-            WHERE other.student_id <> $student_id
+        MATCH (other:Student)-[:HAS_SKILL]->(other_skill:Skill)
 
-            WITH me, other, collect(DISTINCT my_skill.name) AS matching_skills
+        WHERE other.student_id <> $student_id
+        AND ALL(skill IN my_skills
+                WHERE NOT (other)-[:HAS_SKILL]->(skill))
 
-            OPTIONAL MATCH (me)-[:STUDIES_AT]->(my_college:College)
-            OPTIONAL MATCH (other)-[:STUDIES_AT]->(other_college:College)
+        WITH other, collect(DISTINCT other_skill.name) AS other_skills
 
-            WITH other, matching_skills, my_college, other_college
-
-            WHERE my_college IS NULL
-               OR other_college IS NULL
-               OR my_college.college_id <> other_college.college_id
-
-            RETURN other, matching_skills
-            ORDER BY rand()
-            LIMIT $limit
-            """,
-            student_id=student_id,
-            limit=limit,
-        )
-
+        RETURN other, other_skills As matching_skills
+        ORDER BY rand()
+        LIMIT $limit
+        """,
+        student_id=student_id,
+        limit=limit,
+)
         return [
-            {
-                "student": _node_to_dict(record["other"]),
-                "matching_skills": record["matching_skills"],
-            }
-            for record in result
-        ]
+    {
+        "student": _node_to_dict(record["other"]),
+        "matching_skills": record["matching_skills"],
+    }
+    for record in result
+]
 
 
 # Backward-compatible function name.
@@ -639,43 +633,23 @@ def send_connection_request(sender_id, receiver_id):
 
     with driver.session() as session:
         record = session.run(
-            """
-            MATCH (sender:Student {student_id: $sender_id})
-            MATCH (receiver:Student {student_id: $receiver_id})
+    """
+    MATCH (sender:Student {student_id: $sender_id})
+    MATCH (receiver:Student {student_id: $receiver_id})
 
-            OPTIONAL MATCH (sender)-[existing:SENT_REQUEST_TO]->(receiver)
+    MERGE (sender)-[r:SENT_REQUEST_TO]->(receiver)
 
-            WITH sender, receiver, existing
+    ON CREATE SET
+        r.status = 'pending'
 
-            CALL {
-                WITH sender, receiver, existing
+    ON MATCH SET
+        r.status = 'pending'
 
-                WITH sender, receiver, existing
-                WHERE existing IS NULL
-
-                CREATE (sender)-[r:SENT_REQUEST_TO {
-                    status: 'pending'
-                }]->(receiver)
-
-                RETURN 'created' AS result
-
-                UNION
-
-                WITH sender, receiver, existing
-                WHERE existing IS NOT NULL
-
-                SET existing.status = 'pending'
-
-                RETURN 'updated' AS result
-            }
-
-            RETURN result
-            """,
-            sender_id=sender_id,
-            receiver_id=receiver_id,
-        ).single()
-
-        return record["result"] if record else None
+    RETURN r.status AS result
+    """,
+    sender_id=sender_id,
+    receiver_id=receiver_id
+)
 
 
 def get_pending_requests(student_id):
