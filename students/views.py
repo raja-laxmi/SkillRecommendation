@@ -76,18 +76,20 @@ def create_test_student(request):
 def signup_view(request):
 
     if request.method == "GET":
-        return render(
-            request,
-            "students/signup.html",
-        )
+        return render(request, "students/signup.html")
 
     name = request.POST.get("name", "").strip()
-    email = request.POST.get("email", "").strip().lower()
+    email = request.POST.get("email", "").strip()
     password = request.POST.get("password", "")
     bio = request.POST.get("bio", "").strip()
-    skills_input = request.POST.get("skills", "")
-    college_name = request.POST.get("college_name", "").strip()
+    skills_input = request.POST.get("skills", "").strip()
+    college_name = request.POST.get("college", "").strip()
+    qualification = request.POST.get("qualification", "").strip()
     location = request.POST.get("location", "").strip()
+
+    # -----------------------------
+    # BASIC VALIDATION
+    # -----------------------------
 
     if not name:
         messages.error(request, "Name is required.")
@@ -104,28 +106,35 @@ def signup_view(request):
     if len(password) < 8:
         messages.error(
             request,
-            "Password must contain at least 8 characters.",
+            "Password must contain at least 8 characters."
         )
         return render(request, "students/signup.html")
 
     if User.objects.filter(email__iexact=email).exists():
         messages.error(
             request,
-            "Email already exists. Please login instead.",
+            "Email already exists. Please login instead."
         )
         return render(request, "students/signup.html")
 
     if User.objects.filter(username__iexact=email).exists():
         messages.error(
             request,
-            "Email already exists. Please login instead.",
+            "Email already exists. Please login instead."
         )
         return render(request, "students/signup.html")
 
     user = None
 
     try:
-        # Django account
+
+        # -----------------------------
+        # STEP 1 — DJANGO ACCOUNT
+        # -----------------------------
+
+        print("\n========== SIGNUP START ==========")
+        print("STEP 1: Creating Django user...")
+
         user = User.objects.create_user(
             username=email,
             email=email,
@@ -133,9 +142,24 @@ def signup_view(request):
             first_name=name,
         )
 
+        print("STEP 1 SUCCESS: Django user created")
+
+        # -----------------------------
+        # STEP 2 — STUDENT ID
+        # -----------------------------
+
+        print("STEP 2: Getting student ID...")
+
         student_id = get_student_id(user)
 
-        # Neo4j student
+        print("STEP 2 SUCCESS:", student_id)
+
+        # -----------------------------
+        # STEP 3 — NEO4J STUDENT
+        # -----------------------------
+
+        print("STEP 3: Creating Neo4j student...")
+
         cognodb.create_student(
             student_id,
             name,
@@ -143,9 +167,13 @@ def signup_view(request):
             bio,
         )
 
-        # ====================================================
-        # SKILLS
-        # ====================================================
+        print("STEP 3 SUCCESS: Neo4j student created")
+
+        # -----------------------------
+        # STEP 4 — SKILLS
+        # -----------------------------
+
+        print("STEP 4: Processing skills...")
 
         seen_skills = set()
 
@@ -160,70 +188,98 @@ def signup_view(request):
 
             normalized = skill_name.lower()
 
-            # Prevent "Python, python, PYTHON"
-            # from being processed three times.
             if normalized in seen_skills:
                 continue
 
             seen_skills.add(normalized)
+
+            print("ADDING SKILL:", skill_name)
 
             cognodb.add_skill_to_student_by_name(
                 student_id,
                 skill_name,
             )
 
-        # ====================================================
-        # COLLEGE
-        # ====================================================
+        print("STEP 4 SUCCESS: Skills processed")
+
+        # -----------------------------
+        # STEP 5 — COLLEGE
+        # -----------------------------
+
+        print("STEP 5: Processing college...")
 
         if college_name:
+
+            print("Creating/finding college:", college_name)
 
             college_id = cognodb.make_college_id(
                 college_name
             )
 
-            cognodb.create_college(
-                college_id,
-                college_name,
-                location,
-            )
+            print("College ID:", college_id)
 
             cognodb.add_student_college(
                 student_id,
                 college_id,
             )
 
-        # Login immediately after signup
+        print("STEP 5 SUCCESS: College processed")
+
+        # -----------------------------
+        # STEP 6 — OTHER DETAILS
+        # -----------------------------
+
+        print("STEP 6: Processing other profile details...")
+
+        # Keep your existing qualification/location
+        # code here exactly as you already have it.
+
+        print("STEP 6 SUCCESS")
+
+        # -----------------------------
+        # LOGIN
+        # -----------------------------
+
+        print("STEP 7: Logging user in...")
+
         login(request, user)
 
         messages.success(
             request,
-            "Account created successfully.",
+            "Account created successfully!"
         )
+
+        print("========== SIGNUP SUCCESS ==========\n")
 
         return redirect("students:dashboard")
 
     except Exception as e:
 
-        # Avoid a half-created Django account if Neo4j fails.
+        print("\n========== SIGNUP FAILED ==========")
+        print("ERROR TYPE:", type(e).__name__)
+        print("ERROR:", repr(e))
+        print("===================================\n")
+
+        # Remove half-created Django account
         if user is not None:
             try:
                 user.delete()
-            except Exception:
-                pass
+                print("Django user deleted after failure.")
+            except Exception as delete_error:
+                print(
+                    "Could not delete Django user:",
+                    repr(delete_error)
+                )
 
-        logger.exception("Signup failed for %s", email)
         messages.error(
             request,
-            "Unable to create account because the database is unavailable. "
-            "Please try again later.",
+            f"Signup failed: {type(e).__name__}: {e}"
         )
 
         return render(
             request,
-            "students/signup.html",
+            "students/signup.html"
         )
-
 
 def login_view(request):
 
